@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  uid      String    @unique @default(cuid())
+  login    String    @unique
+  email    String    @unique
+  nicename String
+  password String
+  type     String    @default("User")
+  status   String    @default("Active")
+  language String    @default("en")
+  metas    Json?     @default("{}")
+  created  DateTime  @default(now())
+  modified DateTime  @default(now())
+  elements Element[]
+
+  @@map("user")
+}
+
+model Element {
+  id                   Int       @id @default(autoincrement())
+  idCategory           Int?      @map("id_category")
+  idParent1            Int?      @map("id_parent1")
+  idParent2            Int?      @map("id_parent2")
+  idUserFirstDiscovery Int?      @map("id_user_first_discovery")
+  name                 String    @unique
+  slug                 String    @unique
+  parent1              String?
+  parent2              String?
+  description          String
+  reasoning            String
+  created              DateTime  @default(now())
+  modified             DateTime  @default(now())
+  category             Category? @relation(fields: [idCategory], references: [id])
+  source               String?
+  users                User[]
+
+  @@map("element")
+}
+
+model Recipe {
+  id          Int      @id @default(autoincrement())
+  element1    String
+  element2    String
+  result      String
+  description String
+  reasoning   String
+  created     DateTime @default(now())
+  modified    DateTime @default(now())
+
+  @@map("recipe")
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  created  DateTime  @default(now())
+  modified DateTime  @default(now())
+  elements Element[]
+
+  @@map("category")
+}

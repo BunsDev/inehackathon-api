@@ -1,0 +1,21 @@
+{
+	"name": "inehackathon-api",
+	"version": "1.0.0",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"nodemon": "nodemon app.js"
+	},
+	"repository": "",
+	"author": "Rodrigo Tejero <rodrigo.tejero@chimp.mx>",
+	"license": "MIT",
+	"dependencies": {
+		"@thewebchimp/primate": "^1.1.14-entities",
+		"axios": "^1.7.2",
+		"bcrypt": "^5.1.1",
+		"handlebars": "^4.7.8",
+		"http-errors": "^2.0.0",
+		"openai": "^4.47.1",
+		"slugify": "^1.6.6"
+	}
+}
