@@ -30,10 +30,7 @@ const rekognition = new AWS.Rekognition();
 
 class AiService {
 
-	static async analyzeAttachment(attachment) {
-
-		// get attachment url
-		const url = AttachmentService.getUrl(attachment);
+	static async analyzeAttachment(url) {
 
 		let toolCalls = null;
 		let tries = 0;
@@ -47,17 +44,6 @@ class AiService {
 						text: `Please analyze the document type of the following file. Consider only the following types:
 						- INE (Mexican National ID) - Front - Identifier: ine_front
 						- INE (Mexican National ID) - Back - Identifier: ine_back
-						- Proof of Address - CFE (Mexican Electric Bill) - Identifier: cfe
-						- Proof of Address - Telmex (Mexican Phone Bill) - Identifier: telmex
-						- Proof of Address - Izzi (Mexican Phone Bill) - Identifier: izzi
-						- Proof of Address - Water Bill - Identifier: water
-						- Proof of Address - Water Bill SAPASA - Identifier: sapasa
-						- Proof of Address - Gas Bill - Identifier: gas
-						- Bank Statement - Identifier: bank_statement
-						- Birth Certificate - Identifier: birth_certificate
-						- Marriage Certificate - Identifier: marriage_certificate
-						- CURP (Mexican National ID) - Identifier: curp
-						- Passport - Identifier: passport
 						
 						Return only the identifier of the document type.
 						Consider that the image may contain more than one document type, in that case separate the identifiers with a comma.`,
@@ -88,10 +74,6 @@ class AiService {
 							documentType: {
 								type: 'string',
 								description: 'The document type identifier, comma separated if more than one',
-							},
-							reasoning: {
-								type: 'string',
-								description: 'The reasoning behind the document type identification, in spanish',
 							},
 						},
 						required: [ 'documentType' ],
