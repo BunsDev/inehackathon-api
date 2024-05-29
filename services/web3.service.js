@@ -48,7 +48,8 @@ class Web3Service {
     static async getCandidate(candidateAddress) {
         const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
         const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, VoteSystem.abi, provider);
-        return await contract.candidates(candidateAddress);
+        const candidate =  await contract.candidates(candidateAddress);
+        return candidate.toString()
     }
 
     static async getCandidateCount(idCandidate) {
