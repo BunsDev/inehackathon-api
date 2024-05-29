@@ -27,3 +27,21 @@ model User {
 
   @@map("user")
 }
+
+model Attachment {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique
+  name       String   @default("")
+  attachment String   @default("")
+  mime       String   @default("")
+  size       Int      @default(0)
+  source     String   @default("")
+  acl        String   @default("")
+  metas      Json?    @default("{}")
+  created    DateTime @default(now())
+  modified   DateTime @default(now())
+
+  documentAttachment DocumentAttachment[]
+
+  @@map("attachment")
+}
