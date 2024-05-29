@@ -15,6 +15,9 @@ router.post('/credential-photo', AttachmentController.getCredentialPhoto);
 // compare faces
 router.post('/compare-faces', AttachmentController.compareFaces);
 
+// ocr
+router.post('/ocr', AttachmentController.ocrAttachment);
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 setupRoute('attachment', router, options);

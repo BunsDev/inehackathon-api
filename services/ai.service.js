@@ -2,6 +2,7 @@ import 'dotenv/config';
 import axios from 'axios';
 import Jimp from 'jimp';
 import { v4 as uuidv4 } from 'uuid';
+import mime from 'mime-types';
 
 import OpenAI from 'openai';
 import vision from '@google-cloud/vision';
@@ -116,23 +117,15 @@ class AiService {
 		return toolCall;
 	}
 
-	static async ocrAnalysis(attachment) {
+	static async ocrAnalysis(url) {
 
-		// get attachment url
-		const url = AttachmentService.getUrl(attachment);
-		const [ result ] = await visionClient.textDetection(attachment.metas.location);
-
+		const [ result ] = await visionClient.textDetection(url);
 		return result.fullTextAnnotation?.text;
 	}
 
-	static async getCredentialPhoto(attachment) {
+	static async getCredentialPhoto(url) {
 
-		// if attachment is a number, it's an id, so we need to get the attachment
-		if(typeof attachment === 'number') {
-			attachment = await AttachmentService.get(attachment);
-		}
-
-		const [ result ] = await visionClient.faceDetection(attachment.metas.location);
+		const [ result ] = await visionClient.faceDetection(url);
 		const faces = result.faceAnnotations;
 
 		if(faces.length === 0) {
@@ -154,7 +147,7 @@ class AiService {
 
 		// Download the image
 		const response = await axios({
-			url: attachment.metas.location,
+			url: url,
 			responseType: 'arraybuffer',
 		});
 		const imageBuffer = Buffer.from(response.data);
@@ -165,41 +158,38 @@ class AiService {
 		// Crop the face region using Jimp
 		const faceImage = image.crop(minX, minY, width, height);
 
+		// generate a unique filename for the face
+		const filename = `${ uuidv4() }-face.png`;
+		const path = `./uploads/${ filename }`;
+
 		// Save the face image to a file (optional)
-		await faceImage.writeAsync('./uploads/face.png');
+		await faceImage.writeAsync(path);
 
 		// upload the face image to an attachment
-		return await AttachmentService.createAttachmentFromLocalFile('./uploads/face.png');
+		return await AttachmentService.uploadLocalFile(path);
 	}
 
-	static async compareFaces(attachment1, attachment2) {
-
-		// if attachment1 is number, it's an id, so we need to get the attachment
-		if(typeof attachment1 === 'number') {
-			attachment1 = await AttachmentService.get(attachment1);
-		}
-
-		// if attachment2 is number, it's an id, so we need to get the attachment
-		if(typeof attachment2 === 'number') {
-			attachment2 = await AttachmentService.get(attachment2);
-		}
+	static async compareFaces(url1, url2) {
 
 		// first we upload both images to the rekognition folder in the S3 bucket
 		// get the file buffer for attachment1
 		const file1 = await axios({
-			url: attachment1.metas.location,
+			url: url1,
 			responseType: 'arraybuffer',
 		});
 
+		// get file name from url1
+		const fileBaseName1 = url1.split('/').pop();
+
 		let uuid = uuidv4();
-		const filename1 = `${ uuid }-${ attachment1.name }`;
+		const filename1 = `${ uuid }-${ fileBaseName1 }`;
 
 		let s3Params = {
 			Bucket: process.env.AWS_BUCKET_NAME,
 			Key: `rekognition/${ filename1 }`,
 			Body: Buffer.from(file1.data),
 			ACL: 'public-read',
-			ContentType: attachment1.mime,
+			ContentType: mime.lookup(fileBaseName1),
 		};
 
 		// s3 upload with await
@@ -207,19 +197,22 @@ class AiService {
 
 		// get the file buffer for attachment2
 		const file2 = await axios({
-			url: attachment2.metas.location,
+			url: url2,
 			responseType: 'arraybuffer',
 		});
 
+		// get file name from url2
+		const fileBaseName2 = url2.split('/').pop();
+
 		uuid = uuidv4();
-		const filename2 = `${ uuid }-${ attachment2.name }`;
+		const filename2 = `${ uuid }-${ fileBaseName2 }`;
 
 		s3Params = {
 			Bucket: process.env.AWS_BUCKET_NAME,
 			Key: `rekognition/${ filename2 }`,
 			Body: Buffer.from(file2.data),
 			ACL: 'public-read',
-			ContentType: attachment2.mime,
+			ContentType: mime.lookup(fileBaseName2),
 		};
 
 		// s3 upload with await
@@ -240,7 +233,7 @@ class AiService {
 					Name: `rekognition/${ filename2 }`,
 				},
 			},
-			SimilarityThreshold: 80, // Adjust the similarity threshold as needed
+			SimilarityThreshold: 85, // Adjust the similarity threshold as needed
 		};
 
 		// Call Rekognition to compare faces

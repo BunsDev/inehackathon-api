@@ -77,6 +77,29 @@ class AttachmentService {
 		}
 	}
 
+	static uploadLocalFile(file, params = {}) {
+		try {
+
+			// get the name from the file path
+			const name = file.split('/').pop();
+
+			// get the size of the file
+			const stats = fs.statSync(file);
+
+			const fileObj = {
+				mimetype: mime.lookup(file),
+				originalname: name,
+				size: stats.size,
+				buffer: fs.readFileSync(file),
+			};
+
+			return AttachmentService.uploadFile(fileObj, params);
+
+		} catch(error) {
+			throw error;
+		}
+	}
+
 	static async uploadFile(file, params = {}) {
 		try {
 			// Get the mime type of the file
