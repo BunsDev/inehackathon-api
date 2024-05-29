@@ -68,25 +68,36 @@ class web3Controller {
     }
 
     static async getCandidate(req, res) {
-
-        // candidates relationship addresss to name
-
         const candidates = {
-            '0x8532a6CbEA6a7d30B46E5a015391840Ff1C472F3': 'Xochitl Gálvez',
-            '0x1234567890123456789012345678901234567891': 'Claudia Sheinbaum',
-            '0x1234567890123456789012345678901234567892': 'Jorge Alvarez Maynez',
+        "federales": {
+            "0x8532a6CbEA6a7d30B46E5a015391840Ff1C472F3": "Xóchitl Gálvez",
+            "0x1234567890123456789012345678901234567891": "Claudia Sheinbaum",
+            "0x1234567890123456789012345678901234567892": "Jorge Álvarez Máynez",
+        },
+        "estatales": {
+            "0xAF0C47284442069bedF8F01B954DE9CAD0fB51De": "Clara Brugada",
+            "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7": "Santiago Taboada",
+            "0x3BCE63C6C9ABf7A47f52c9A3a7950867700B0158": "Salomón Chertorivski"
         }
+    }
 
         // receive via :id the candidate address
         const {id} = req.params;
         try {
             const candidate = await web3Service.getCandidate(id);
+            let findCandidate;
+            for (const key in candidates) {
+                if (candidates[key][id]) {
+                    findCandidate = candidates[key][id];
+                    break;
+                }
+            }
             res.respond({
                 status: 200,
                 data: {
                     count: candidate,
                     idCandidate: id,
-                    name: candidates[id]
+                    name: findCandidate
                 },
             });
         } catch (error) {
