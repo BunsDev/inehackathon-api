@@ -1,0 +1,35 @@
+import web3Service  from "./services/web3.service.js";
+import ethers from "ethers";
+
+
+/// castVote
+
+
+
+const idMexSimulation = 'IDMEX12345';
+const addressCandidate1 = '0x1234567890123456789012345678901234567890';
+const electoralVoteEncoded = ethers.utils.formatBytes32String(idMexSimulation);
+
+
+const castVote = async () => {
+    try {
+        const tx = await web3Service.castVote(addressCandidate1, electoralVoteEncoded);
+        console.log('Transaction hash:', tx.hash);
+    } catch (error) {
+        console.error('Error casting vote:', error);
+    }
+}
+
+// firt add the candidate
+const addCandidate = async () => {
+    try {
+        const tx = await web3Service.addCandidate(addressCandidate1);
+        console.log('Transaction hash:', tx.hash);
+    } catch (error) {
+        console.error('Error adding candidate:', error);
+    }
+}
+
+
+await addCandidate();
+await castVote();

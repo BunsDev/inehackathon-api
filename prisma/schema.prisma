@@ -11,19 +11,18 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  uid      String    @unique @default(cuid())
-  login    String    @unique
-  email    String    @unique
+  id       Int      @id @default(autoincrement())
+  uid      String   @unique @default(cuid())
+  login    String   @unique
+  email    String   @unique
   nicename String
   password String
-  type     String    @default("User")
-  status   String    @default("Active")
-  language String    @default("en")
-  metas    Json?     @default("{}")
-  created  DateTime  @default(now())
-  modified DateTime  @default(now())
-  elements Element[]
+  type     String   @default("User")
+  status   String   @default("Active")
+  language String   @default("en")
+  metas    Json?    @default("{}")
+  created  DateTime @default(now())
+  modified DateTime @default(now())
 
   @@map("user")
 }
@@ -40,8 +39,6 @@ model Attachment {
   metas      Json?    @default("{}")
   created    DateTime @default(now())
   modified   DateTime @default(now())
-
-  documentAttachment DocumentAttachment[]
 
   @@map("attachment")
 }
