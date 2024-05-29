@@ -96,22 +96,26 @@ class AttachmentController {
 
 	static async ocrAttachment(req, res) {
 		try {
-			const id = req.params.id;
-			const attachment = await AttachmentService.findById(id);
+			const { url } = req.body;
 
-			if(!attachment) {
-
+			if(!url) {
 				res.respond({
-					status: 404,
-					message: 'Attachment not found',
+					status: 400,
+					message: 'Attachment URL is required.',
 				});
 			}
 
-			const result = await AiService.ocrAnalysis(attachment);
+			const ocrText = await AiService.ocrAnalysis(url);
+
+			const extractIDMEX = (text) => {
+				const regex = /IDMEX[^<]*/;
+				const match = text.match(regex);
+				return match ? match[0] : null;
+			};
 
 			res.respond({
 				status: 200,
-				data: result,
+				data: extractIDMEX(ocrText),
 			});
 
 		} catch(error) {
@@ -126,18 +130,11 @@ class AttachmentController {
 		try {
 
 			// check if we receive id
-			const id = req.params.id;
+			const { url } = req.body;
 
-			let photo;
+			console.log();
 
-			if(!!id) {
-				photo = await AiService.getCredentialPhoto(id);
-			} else {
-
-				const attachment = req.body;
-				photo = await AiService.getCredentialPhoto(attachment);
-			}
-
+			const photo = await AiService.getCredentialPhoto(url);
 			res.respond({
 				status: 200,
 				data: photo,
@@ -153,9 +150,9 @@ class AttachmentController {
 
 	static async compareFaces(req, res) {
 		try {
-			const { id1, id2 } = req.body;
+			const { url1, url2 } = req.body;
 
-			const recognition = await AiService.compareFaces(id1, id2);
+			const recognition = await AiService.compareFaces(url1, url2);
 
 			res.respond({
 				status: 200,
