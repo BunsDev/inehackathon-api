@@ -5,8 +5,9 @@ const router = getRouter();
 const options = {};
 
 
-router.post('/castVote',  web3Controller.castVote);
-router.post('/addCandidate', web3Controller.addCandidate);
+router.post('/vote',  web3Controller.castVote);
+router.post('/candidate', web3Controller.addCandidate);
 router.get('/:id/candidate', web3Controller.getCandidate);
+router.post('/mint', web3Controller.mintVoteProof);
 
 export { router };
