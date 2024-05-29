@@ -4,6 +4,26 @@ import ethers from "ethers";
 class web3Controller {
 
     // castVote receieves via post candidate and idVote
+
+    static async mintVoteProof(req, res) {
+        // get address from body
+        const {address} = req.body;
+        try {
+            const tx = await web3Service.mintVoteProof(address, 'https://blockchainstarter.nyc3.digitaloceanspaces.com/inehack/vote.png');
+            res.respond({
+                status: 200,
+                data: {
+                    hash: tx.hash,
+                    urlTestnet: `https://testnet.snowtrace.io/tx/${tx.hash}`
+                },
+            });
+        } catch (error) {
+            res.respond({
+                status: 400,
+                message: 'Error minting vote proof: ' + error.message,
+            });
+        }
+    }
     static async castVote(req, res) {
 
         const {candidate, idVote} = req.body;
