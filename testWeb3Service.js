@@ -31,5 +31,18 @@ const addCandidate = async () => {
 }
 
 
-await addCandidate();
+// await addCandidate();
 await castVote();
+
+const getCandidate = async () => {
+    try {
+        const candidate = await web3Service.getCandidate(addressCandidate1);
+        console.log('Candidate:', candidate.toString());
+        /// print as normal number
+
+    } catch (error) {
+        console.error('Error getting candidate:', error);
+    }
+}
+
+await getCandidate();
