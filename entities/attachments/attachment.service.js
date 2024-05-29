@@ -77,6 +77,46 @@ class AttachmentService {
 		}
 	}
 
+	static async uploadFile(file, params = {}) {
+		try {
+			// Get the mime type of the file
+			const mimeType = file.mimetype;
+			const acl = params.acl || 'public-read';
+
+			// The file should go to /upload/[year]/[month]/[filename]
+			const date = new Date();
+			const year = date.getFullYear();
+			let month = date.getMonth() + 1;
+
+			// Add padded zero to month
+			if(month < 10) month = '0' + month;
+
+			// Append uuid to file original name
+			const uuid = uuidv4();
+			let filename = `${ uuid }-${ file.originalname }`;
+
+			// Slugify filename
+			filename = slugify(filename, { lower: true });
+
+			const s3Params = {
+				Bucket: process.env.SPACES_BUCKET_NAME,
+				Key: `upload/${ year }/${ month }/${ filename }`,
+				Body: file.buffer,
+				ACL: acl,
+				ContentType: mimeType,
+			};
+
+			// S3 upload with await
+			const data = await s3.upload(s3Params).promise();
+
+			return {
+				data,
+			};
+		} catch(error) {
+			throw error;
+		}
+	}
+
 	static async createAttachment(file, params = {}) {
 		try {
 

@@ -6,17 +6,14 @@ const options = {};
 
 // Functions -----------------------------------------------------------------------------------------------------------
 
-// register
-router.get('/:id', AttachmentController.viewAttachment);
-
 // analyze
-router.post('/:id/analyze', auth, AttachmentController.analyzeAttachment);
+router.post('/analyze', AttachmentController.analyzeAttachment);
 
 // get the credential photo
-router.post('/credential-photo', auth, AttachmentController.getCredentialPhoto);
+router.post('/credential-photo', AttachmentController.getCredentialPhoto);
 
 // compare faces
-router.post('/compare-faces', auth, AttachmentController.compareFaces);
+router.post('/compare-faces', AttachmentController.compareFaces);
 
 // ---------------------------------------------------------------------------------------------------------------------
 

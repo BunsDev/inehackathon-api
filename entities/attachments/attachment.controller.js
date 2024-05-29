@@ -57,29 +57,18 @@ class AttachmentController {
 	 */
 	static async analyzeAttachment(req, res) {
 		try {
-			const { id } = req.params;
+			const { url } = req.body;
 
 			// Validate input parameter
-			if(!id) {
+			if(!url) {
 				return res.respond({
 					status: 400,
-					message: 'Attachment ID is required.',
-				});
-			}
-
-			// Fetch attachment by ID
-			const attachment = await AttachmentService.findById(id);
-
-			// Validate output from AttachmentService
-			if(!attachment) {
-				return res.respond({
-					status: 404,
-					message: 'Attachment not found.',
+					message: 'Attachment URL is required.',
 				});
 			}
 
 			// Analyze the attachment using AI service
-			const analysis = await AiService.analyzeAttachment(attachment);
+			const analysis = await AiService.analyzeAttachment(url);
 
 			// Validate output from AiService
 			if(!analysis) {
