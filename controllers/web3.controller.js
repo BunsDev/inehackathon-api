@@ -1,5 +1,6 @@
 import web3Service from "../services/web3.service.js";
 import ethers from "ethers";
+import {sha256} from "ethers/lib/utils.js";
 
 class web3Controller {
 
@@ -25,10 +26,18 @@ class web3Controller {
         }
     }
     static async castVote(req, res) {
+        const { candidate, idVote } = req.body;
 
-        const {candidate, idVote} = req.body;
         try {
-            const electoralVoteEncoded = ethers.utils.formatBytes32String(idVote);
+            // Concatenar candidate e idVote
+            const concatenatedData = candidate + idVote;
+
+            // Hashear la concatenación
+            const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(concatenatedData));
+
+            // Convertir el hash a bytes32
+            const electoralVoteEncoded = ethers.utils.hexZeroPad(hash, 32);
+
             const tx = await web3Service.castVote(candidate, electoralVoteEncoded);
             res.respond({
                 status: 200,
@@ -43,7 +52,6 @@ class web3Controller {
                 message: 'Error casting vote: ' + error.message,
             });
         }
-
     }
 
     // add candidate
