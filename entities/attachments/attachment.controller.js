@@ -106,11 +106,13 @@ class AttachmentController {
 			}
 
 			// const ocrText = await AiService.ocrAnalysis(url);
-			const idMex = await AiService.ocrChainlinkAnalysis(url);
-
+			const { data, tx } = await AiService.ocrChainlinkAnalysis(url);
 			res.respond({
 				status: 200,
-				data: idMex,
+				data: {
+					idMex: data,
+					tx
+				}
 			});
 
 		} catch(error) {

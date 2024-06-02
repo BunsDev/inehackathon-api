@@ -21,13 +21,14 @@ let googleVisionBeaerer = '';
 const source = fs.readFileSync('./functions/ocr.function.js').toString();
 
 const auth = new GoogleAuth({
-    keyFilename: './.credentials/silent-wharf-177718-15d1c60f4807.json', // Asegúrate de que el path al archivo JSON es correcto
+    keyFilename: '.credentials/silent-wharf-177718-15d1c60f4807.json', // Asegúrate de que el path al archivo JSON es correcto
     scopes: ['https://www.googleapis.com/auth/cloud-vision'], // Cambia los scopes según la API que estés usando
 });
 
 
 const visionClient = new vision.ImageAnnotatorClient({
-    keyFilename: '../.credentials/silent-wharf-177718-15d1c60f4807.json',
+keyFilename: '.credentials/silent-wharf-177718-15d1c60f4807.json',
+
 });
 
 AWS.config.update({region: 'us-east-1'});
@@ -74,13 +75,17 @@ static async decryptValue(encryptedText, key) {
             const client = await auth.getClient();
             googleVisionBeaerer = await client.getAccessToken();
             secrets.apiKey = googleVisionBeaerer.token;
-            const fun =  await ChainLinkService.makeChainLinkRequest(
+            const {data, tx } =  await ChainLinkService.makeChainLinkRequest(
                 source,
                 [url],
                 300_000,
                 secrets,
             );
-            return await AiService.decryptValue(fun, secrets.apiKey);
+            const decryptedData =  await AiService.decryptValue(data, secrets.apiKey);
+            return {
+                data: decryptedData,
+                tx: tx
+            }
         } catch (error) {
 
         }

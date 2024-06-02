@@ -183,7 +183,10 @@ class ChainLinkService {
 					// decodedResponse as string
 					const decodedResponseString = decodeResult(response.responseBytesHexstring, ReturnType.string);
 					console.log(`\n✅ Decoded response to ${ ReturnType.string }: `, decodedResponseString);
-					return decodedResponseString;
+					return {
+						data: decodedResponseString,
+						tx: `${ explorerUrl }/tx/${ transaction.hash }`
+					};
 				}
 			}
 		} catch(error) {
