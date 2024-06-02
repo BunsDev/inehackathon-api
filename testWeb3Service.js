@@ -16,7 +16,7 @@ const castVote = async () => {
 	}
 };
 
-// firt add the candidate
+// first add the candidate
 const addCandidate = async () => {
 	try {
 		const tx = await web3Service.addCandidate(addressCandidate1);
