@@ -19,14 +19,14 @@ class Web3Service {
 		return tx;
 	}
 
-    static async addCandidate(candidate) {
-        const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-        const wallet = new ethers.Wallet(privateKey, provider);
-        const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, VoteSystem.abi, wallet);
-        const tx = await contract.addCandidate(candidate);
-        await tx.wait();
-        return tx;
-    }
+	static async addCandidate(candidate) {
+		const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+		const wallet = new ethers.Wallet(privateKey, provider);
+		const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, VoteSystem.abi, wallet);
+		const tx = await contract.addCandidate(candidate);
+		await tx.wait();
+		return tx;
+	}
 
 	static async getCandidate(candidateAddress) {
 		const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
@@ -35,29 +35,28 @@ class Web3Service {
 		return candidate.toString();
 	}
 
-    static async getCandidateCount(idCandidate) {
-        const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-        const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, VoteSystem.abi, provider);
-        return await contract.candidate(idCandidate);
-    }
+	static async getCandidateCount(idCandidate) {
+		const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+		const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, VoteSystem.abi, provider);
+		return await contract.candidate(idCandidate);
+	}
 
-    static async mintVoteProof(to, uri) {
-        const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-        const wallet = new ethers.Wallet(privateKey, provider);
+	static async mintVoteProof(to, uri) {
+		const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+		const wallet = new ethers.Wallet(privateKey, provider);
 
+		/// genera abi para usar safeMint
+		const nftAbi = [
+			'function safeMint(address to, string memory uri) public returns (uint256)',
+		];
 
-        /// genera abi para usar safeMint
-        const nftAbi = [
-            "function safeMint(address to, string memory uri) public returns (uint256)"
-        ];
-
-        const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, nftAbi, wallet);
-        console.log("Imprime el contrato")
-        console.log(contract)
-        const tx = await contract.safeMint(to, uri);
-        await tx.wait();
-        return tx;
-    }
+		const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, nftAbi, wallet);
+		console.log('Imprime el contrato');
+		console.log(contract);
+		const tx = await contract.safeMint(to, uri);
+		await tx.wait();
+		return tx;
+	}
 }
 
 export default Web3Service;

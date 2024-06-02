@@ -1,148 +1,176 @@
-import fs from 'fs';
-import path from 'path';
+import 'dotenv/config';
 import {
-  SubscriptionManager,
-  simulateScript,
-  ResponseListener,
-  ReturnType,
-  decodeResult,
-  FulfillmentCode
+	SubscriptionManager,
+	simulateScript,
+	SecretsManager,
+	ResponseListener,
+	createGist,
+	ReturnType,
+	decodeResult,
+	FulfillmentCode,
 } from '@chainlink/functions-toolkit';
 import { ethers } from 'ethers';
-import dotenv from 'dotenv';
-import functionsConsumerAbi from '../abi/functionsClient.json';
+import functionsConsumerAbi from '../abi/functionsClient.json' assert { type: 'json' };
 
-dotenv.config();
 
-const consumerAddress = "0x2084ee780c753e20756fb824394d4ef5d39dbcd3"; // REPLACE this with your Functions consumer address
+const consumerAddress = '0x2084ee780c753e20756fb824394d4ef5d39dbcd3'; // REPLACE this with your Functions consumer address
 const subscriptionId = 9121; // REPLACE this with your subscription ID
 
 const ENV_VARS = {
-  PRIVATE_KEY: process.env.PRIVATE_KEY,
-  RPC_URL: process.env.RPC_URL,
+	PRIVATE_KEY: process.env.PRIVATE_KEY,
+	RPC_URL: process.env.RPC_URL,
 };
 
 class ChainLinkService {
-  static async makeChainlinkRequest(stringJavascriptCode, args, gasLimit, secrets) {
-    const routerAddress = "0x2084ee780c753e20756fb824394d4ef5d39dbcd3";
-    const linkTokenAddress = "0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846";
-    const donId = "fun-avalanche-fuji-1";
-    const explorerUrl = "https://testnet.snowtrace.io";
-    const source = stringJavascriptCode;
+	static async makeChainlinkRequest(stringJavascriptCode, args, gasLimit, secrets) {
+		const routerAddress = '0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0';
+		const linkTokenAddress = '0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846';
+		const donId = 'fun-avalanche-fuji-1';
+		const explorerUrl = 'https://testnet.snowtrace.io';
+		const source = stringJavascriptCode;
 
-    if (!ENV_VARS.PRIVATE_KEY) {
-      throw new Error("Private key not provided - check your environment variables");
-    }
+		if(!ENV_VARS.PRIVATE_KEY) {
+			throw new Error('Private key not provided - check your environment variables');
+		}
 
-    if (!ENV_VARS.RPC_URL) {
-      throw new Error("RPC URL not provided - check your environment variables");
-    }
+		if(!ENV_VARS.RPC_URL) {
+			throw new Error('RPC URL not provided - check your environment variables');
+		}
 
-    const provider = new ethers.providers.JsonRpcProvider(ENV_VARS.RPC_URL);
-    const wallet = new ethers.Wallet(ENV_VARS.PRIVATE_KEY);
-    const signer = wallet.connect(provider);
+		const provider = new ethers.providers.JsonRpcProvider(ENV_VARS.RPC_URL);
+		const wallet = new ethers.Wallet(ENV_VARS.PRIVATE_KEY);
+		const signer = wallet.connect(provider);
 
-    console.log("Start simulation...");
+		/*console.log('Start simulation...');
 
-    const response = await simulateScript({
-      source: source,
-      args: args,
-      bytesArgs: [],
-      secrets: secrets,
-    });
+		const response = await simulateScript({
+			source: source,
+			args: args,
+			bytesArgs: [],
+			secrets: secrets,
+		});
 
-    console.log("Simulation result", response);
-    const errorString = response.errorString;
-    if (errorString) {
-      console.log(`❌ Error during simulation: `, errorString);
-    } else {
-      const returnType = ReturnType.uint256;
-      const responseBytesHexstring = response.responseBytesHexstring;
-      if (ethers.utils.arrayify(responseBytesHexstring).length > 0) {
-        const decodedResponse = decodeResult(response.responseBytesHexstring, returnType);
-        console.log(`✅ Decoded response to ${returnType}: `, decodedResponse);
-      }
-    }
+		console.log('Simulation result', response);
+		const errorString = response.errorString;
+		if(errorString) {
+			console.log(`❌ Error during simulation: `, errorString);
+		} else {
+			const returnType = ReturnType.uint256;
+			const responseBytesHexstring = response.responseBytesHexstring;
+			if(ethers.utils.arrayify(responseBytesHexstring).length > 0) {
+				const decodedResponse = decodeResult(response.responseBytesHexstring, returnType);
+				console.log(`✅ Decoded response to ${ returnType }: `, decodedResponse);
+			}
+		}*/
 
-    console.log("\nEstimate request costs...");
+		console.log('\nEstimate request costs...');
 
-    const subscriptionManager = new SubscriptionManager({
-      signer: signer,
-      linkTokenAddress: linkTokenAddress,
-      functionsRouterAddress: routerAddress,
-    });
-    await subscriptionManager.initialize();
+		const subscriptionManager = new SubscriptionManager({
+			signer: signer,
+			linkTokenAddress: linkTokenAddress,
+			functionsRouterAddress: routerAddress,
+		});
+		await subscriptionManager.initialize();
 
-    const gasPriceWei = await signer.getGasPrice();
+		const gasPriceWei = await signer.getGasPrice();
 
-    const estimatedCostInJuels = await subscriptionManager.estimateFunctionsRequestCost({
-      donId: donId,
-      subscriptionId: subscriptionId,
-      callbackGasLimit: gasLimit,
-      gasPriceWei: BigInt(gasPriceWei),
-    });
+		const estimatedCostInJuels = await subscriptionManager.estimateFunctionsRequestCost({
+			donId: donId,
+			subscriptionId: subscriptionId,
+			callbackGasLimit: gasLimit,
+			gasPriceWei: BigInt(gasPriceWei),
+		});
 
-    console.log(`Fulfillment cost estimated to ${ethers.utils.formatEther(estimatedCostInJuels)} LINK`);
+		console.log(`Fulfillment cost estimated to ${ ethers.utils.formatEther(estimatedCostInJuels) } LINK`);
 
-    console.log("\nMake request...");
+		console.log('\nMake request...');
 
-    const functionsConsumer = new ethers.Contract(consumerAddress, functionsConsumerAbi, signer);
+		const secretsManager = new SecretsManager({
+			signer,
+			functionsRouterAddress: routerAddress,
+			donId,
+		});
 
-    const transaction = await functionsConsumer.sendRequest(
-      source,
-      "0x",
-      0,
-      0,
-      args,
-      [],
-      subscriptionId,
-      gasLimit,
-      ethers.utils.formatBytes32String(donId)
-    );
+		await secretsManager.initialize();
 
-    console.log(`\n✅ Functions request sent! Transaction hash ${transaction.hash}. Waiting for a response...`);
-    console.log(`See your request in the explorer ${explorerUrl}/tx/${transaction.hash}`);
+		const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
 
-    const responseListener = new ResponseListener({
-      provider: provider,
-      functionsRouterAddress: routerAddress,
-    });
+		console.log(`Creating gist...`);
+		const githubApiToken = process.env.GITHUB_API_TOKEN;
+		if(!githubApiToken)
+			throw new Error(
+				'githubApiToken not provided - check your environment variables',
+			);
 
-    try {
-      const response = await new Promise((resolve, reject) => {
-        responseListener.listenForResponseFromTransaction(transaction.hash)
-          .then((response) => {
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
+		// Create a new GitHub Gist to store the encrypted secrets
+		const gistURL = await createGist(
+			githubApiToken,
+			JSON.stringify(encryptedSecretsObj),
+		);
+		console.log(`\n✅Gist created ${ gistURL } . Encrypt the URLs..`);
+		const encryptedSecretsUrls = await secretsManager.encryptSecretsUrls([
+			gistURL,
+		]);
 
-      const fulfillmentCode = response.fulfillmentCode;
+		console.log(encryptedSecretsObj);
 
-      if (fulfillmentCode === FulfillmentCode.FULFILLED) {
-        console.log(`\n✅ Request ${response.requestId} successfully fulfilled. Cost is ${ethers.utils.formatEther(response.totalCostInJuels)} LINK. Complete response: `, response);
-      } else if (fulfillmentCode === FulfillmentCode.USER_CALLBACK_ERROR) {
-        console.log(`\n⚠️ Request ${response.requestId} fulfilled. However, the consumer contract callback failed. Cost is ${ethers.utils.formatEther(response.totalCostInJuels)} LINK. Complete response: `, response);
-      } else {
-        console.log(`\n❌ Request ${response.requestId} not fulfilled. Code: ${fulfillmentCode}. Cost is ${ethers.utils.formatEther(response.totalCostInJuels)} LINK. Complete response: `, response);
-      }
+		const functionsConsumer = new ethers.Contract(consumerAddress, functionsConsumerAbi, signer);
 
-      const errorString = response.errorString;
-      if (errorString) {
-        console.log(`\n❌ Error during the execution: `, errorString);
-      } else {
-        const responseBytesHexstring = response.responseBytesHexstring;
-        if (ethers.utils.arrayify(responseBytesHexstring).length > 0) {
-          const decodedResponse = decodeResult(response.responseBytesHexstring, ReturnType.uint256);
-          console.log(`\n✅ Decoded response to ${ReturnType.uint256}: `, decodedResponse);
-        }
-      }
-    } catch (error) {
-      console.error("Error listening for response:", error);
-    }
-  }
+		const transaction = await functionsConsumer.sendRequest(
+			source,
+			'0x',
+			0,
+			0,
+			args,
+			[],
+			subscriptionId,
+			gasLimit,
+			ethers.utils.formatBytes32String(donId),
+		);
+
+		console.log(`\n✅ Functions request sent! Transaction hash ${ transaction.hash }. Waiting for a response...`);
+		console.log(`See your request in the explorer ${ explorerUrl }/tx/${ transaction.hash }`);
+
+		const responseListener = new ResponseListener({
+			provider: provider,
+			functionsRouterAddress: routerAddress,
+		});
+
+		try {
+			const response = await new Promise((resolve, reject) => {
+				responseListener.listenForResponseFromTransaction(transaction.hash)
+					.then((response) => {
+						resolve(response);
+					})
+					.catch((error) => {
+						reject(error);
+					});
+			});
+
+			const fulfillmentCode = response.fulfillmentCode;
+
+			if(fulfillmentCode === FulfillmentCode.FULFILLED) {
+				console.log(`\n✅ Request ${ response.requestId } successfully fulfilled. Cost is ${ ethers.utils.formatEther(response.totalCostInJuels) } LINK. Complete response: `, response);
+			} else if(fulfillmentCode === FulfillmentCode.USER_CALLBACK_ERROR) {
+				console.log(`\n⚠️ Request ${ response.requestId } fulfilled. However, the consumer contract callback failed. Cost is ${ ethers.utils.formatEther(response.totalCostInJuels) } LINK. Complete response: `, response);
+			} else {
+				console.log(`\n❌ Request ${ response.requestId } not fulfilled. Code: ${ fulfillmentCode }. Cost is ${ ethers.utils.formatEther(response.totalCostInJuels) } LINK. Complete response: `, response);
+			}
+
+			const errorString = response.errorString;
+			if(errorString) {
+				console.log(`\n❌ Error during the execution: `, errorString);
+			} else {
+				const responseBytesHexstring = response.responseBytesHexstring;
+				if(ethers.utils.arrayify(responseBytesHexstring).length > 0) {
+					const decodedResponse = decodeResult(response.responseBytesHexstring, ReturnType.uint256);
+					console.log(`\n✅ Decoded response to ${ ReturnType.uint256 }: `, decodedResponse);
+				}
+			}
+		} catch(error) {
+			console.error('Error listening for response:', error);
+		}
+	}
 }
 
 export default ChainLinkService;
