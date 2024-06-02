@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import ChainLinkService from './services/chainlink.service.js';
+import AiService from "./services/ai.service.js";
+/*
 import fs from 'fs';
 import { GoogleAuth } from 'google-auth-library';
 
@@ -37,4 +39,12 @@ const fun = await ChainLinkService.makeChainLinkRequest(
 	secrets
 );
 
+
+const unencrypt = await AiService.decryptValue(fun, secrets.apiKey);
+console.log("[IDMEX IS: ]", unencrypt);
 console.log(fun);
+*/
+
+
+const res = await AiService.ocrChainlinkAnalysis('https://ag1.sfo3.digitaloceanspaces.com/upload/2024/06/62c6ab5f-b265-4c55-b2b6-d11011781c10-ine-rodrigo-tras.jpeg');
+console.log("EL RESULTADO ES: ", res);

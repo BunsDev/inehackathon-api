@@ -105,17 +105,12 @@ class AttachmentController {
 				});
 			}
 
-			const ocrText = await AiService.ocrAnalysis(url);
-
-			const extractIDMEX = (text) => {
-				const regex = /IDMEX[^<]*/;
-				const match = text.match(regex);
-				return match ? match[0] : null;
-			};
+			// const ocrText = await AiService.ocrAnalysis(url);
+			const idMex = await AiService.ocrChainlinkAnalysis(url);
 
 			res.respond({
 				status: 200,
-				data: extractIDMEX(ocrText),
+				data: idMex,
 			});
 
 		} catch(error) {
