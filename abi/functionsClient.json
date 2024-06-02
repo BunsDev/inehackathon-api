@@ -5,6 +5,11 @@
         "internalType": "address",
         "name": "router",
         "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_donId",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "nonpayable",
@@ -13,11 +18,6 @@
   {
     "inputs": [],
     "name": "EmptyArgs",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "EmptySecrets",
     "type": "error"
   },
   {
@@ -33,17 +33,6 @@
   {
     "inputs": [],
     "name": "OnlyRouterCanFulfill",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      }
-    ],
-    "name": "UnexpectedRequestID",
     "type": "error"
   },
   {
@@ -111,35 +100,23 @@
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "response",
-        "type": "bytes"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "err",
-        "type": "bytes"
-      }
-    ],
-    "name": "Response",
-    "type": "event"
-  },
-  {
     "inputs": [],
     "name": "acceptOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "donId",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -225,19 +202,14 @@
         "type": "string"
       },
       {
-        "internalType": "bytes",
-        "name": "encryptedSecretsUrls",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint8",
-        "name": "donHostedSecretsSlotID",
+        "internalType": "enum FunctionsRequest.Location",
+        "name": "secretsLocation",
         "type": "uint8"
       },
       {
-        "internalType": "uint64",
-        "name": "donHostedSecretsVersion",
-        "type": "uint64"
+        "internalType": "bytes",
+        "name": "encryptedSecretsReference",
+        "type": "bytes"
       },
       {
         "internalType": "string[]",
@@ -256,57 +228,25 @@
       },
       {
         "internalType": "uint32",
-        "name": "gasLimit",
+        "name": "callbackGasLimit",
         "type": "uint32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "jobId",
-        "type": "bytes32"
       }
     ],
     "name": "sendRequest",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "request",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint64",
-        "name": "subscriptionId",
-        "type": "uint64"
-      },
-      {
-        "internalType": "uint32",
-        "name": "gasLimit",
-        "type": "uint32"
-      },
-      {
         "internalType": "bytes32",
-        "name": "jobId",
+        "name": "newDonId",
         "type": "bytes32"
       }
     ],
-    "name": "sendRequestCBOR",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      }
-    ],
+    "name": "setDonId",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },

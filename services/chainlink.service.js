@@ -132,15 +132,12 @@ class ChainLinkService {
 
 		const transaction = await functionsConsumer.sendRequest(
 			source,
+			1,
 			encryptedSecretsUrls,
-			0,
-			0,
 			args,
 			[],
 			subscriptionId,
-			gasLimit,
-			ethers.utils.formatBytes32String(donId),
-			overrides,
+			gasLimit
 		);
 
 		console.log(`\n✅  Functions request sent! Transaction hash ${ transaction.hash }. Waiting for a response...`);
@@ -177,6 +174,7 @@ class ChainLinkService {
 				console.log(`\n❌ Error during the execution: `, errorString);
 			} else {
 				const responseBytesHexstring = response.responseBytesHexstring;
+
 				if(ethers.utils.arrayify(responseBytesHexstring).length > 0) {
 					const decodedResponse = decodeResult(response.responseBytesHexstring, ReturnType.uint256);
 					console.log(`\n✅ Decoded response to ${ ReturnType.uint256 }: `, decodedResponse);
