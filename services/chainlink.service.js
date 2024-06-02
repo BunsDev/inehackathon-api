@@ -5,6 +5,7 @@ import {
 	SecretsManager,
 	ResponseListener,
 	createGist,
+	deleteGist,
 	ReturnType,
 	decodeResult,
 	FulfillmentCode,
@@ -137,7 +138,7 @@ class ChainLinkService {
 			args,
 			[],
 			subscriptionId,
-			gasLimit
+			gasLimit,
 		);
 
 		console.log(`\n✅  Functions request sent! Transaction hash ${ transaction.hash }. Waiting for a response...`);
@@ -178,10 +179,17 @@ class ChainLinkService {
 				if(ethers.utils.arrayify(responseBytesHexstring).length > 0) {
 					const decodedResponse = decodeResult(response.responseBytesHexstring, ReturnType.uint256);
 					console.log(`\n✅ Decoded response to ${ ReturnType.uint256 }: `, decodedResponse);
+
+					// decodedResponse as string
+					const decodedResponseString = decodeResult(response.responseBytesHexstring, ReturnType.string);
+					console.log(`\n✅ Decoded response to ${ ReturnType.string }: `, decodedResponseString);
 				}
 			}
 		} catch(error) {
 			console.error('Error listening for response:', error);
+		} finally {
+			// delete the gist
+			await deleteGist(githubApiToken, gistURL);
 		}
 	}
 }
