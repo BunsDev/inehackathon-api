@@ -94,6 +94,53 @@ class AttachmentController {
 		}
 	}
 
+	static async recognition(req, res) {
+		try {
+			const { url1, url2 } = req.body;
+
+			if(!url1 || !url2) {
+				res.respond({
+					status: 400,
+					message: 'Attachment URLs are required.',
+				});
+			}
+
+			const recognition = await AiService.recognitionChainlinkAnalysis(url1, url2);
+			let recognitionData;
+
+			console.log('Recognition:', recognition);
+
+			// if recognition is not empty, explode by comma
+			if(recognition) {
+
+				console.log('Recognition:', recognition.data);
+
+				recognitionData = recognition.data.split(',');
+
+				// first one is matched, second one is similarity
+				recognitionData = {
+					matched: recognitionData[0],
+					similarity: recognitionData[1],
+					tx: recognition.tx
+				};
+
+				console.log('Recognition Data:', recognitionData);
+			}
+
+			res.respond({
+				status: 200,
+				data: recognitionData,
+			});
+
+		} catch(error) {
+			res.respond({
+				status: 400,
+				message: 'Error recognizing attachment: ' + error.message,
+			});
+		}
+
+	}
+
 	static async ocrAttachment(req, res) {
 		try {
 			const { url } = req.body;
@@ -105,17 +152,14 @@ class AttachmentController {
 				});
 			}
 
-			const ocrText = await AiService.ocrAnalysis(url);
-
-			const extractIDMEX = (text) => {
-				const regex = /IDMEX[^<]*/;
-				const match = text.match(regex);
-				return match ? match[0] : null;
-			};
-
+			// const ocrText = await AiService.ocrAnalysis(url);
+			const { data, tx } = await AiService.ocrChainlinkAnalysis(url);
 			res.respond({
 				status: 200,
-				data: extractIDMEX(ocrText),
+				data: {
+					idMex: data,
+					tx
+				}
 			});
 
 		} catch(error) {

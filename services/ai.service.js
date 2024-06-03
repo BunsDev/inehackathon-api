@@ -8,10 +8,20 @@ import OpenAI from 'openai';
 import vision from '@google-cloud/vision';
 import AttachmentService from '../entities/attachments/attachment.service.js';
 import AWS from 'aws-sdk';
+import fs from 'fs';
+import { GoogleAuth } from 'google-auth-library';
+import ChainLinkService from './chainlink.service.js';
+
 const openai = new OpenAI();
+
+const auth = new GoogleAuth({
+	keyFilename: '.credentials/silent-wharf-177718-15d1c60f4807.json', // Asegúrate de que el path al archivo JSON es correcto
+	scopes: [ 'https://www.googleapis.com/auth/cloud-vision' ], // Cambia los scopes según la API que estés usando
+});
 
 const visionClient = new vision.ImageAnnotatorClient({
 	keyFilename: '.credentials/silent-wharf-177718-15d1c60f4807.json',
+
 });
 
 AWS.config.update({ region: 'us-east-1' });
@@ -30,6 +40,85 @@ const s3 = new AWS.S3({
 const rekognition = new AWS.Rekognition();
 
 class AiService {
+	static async decryptValue(encryptedText, key) {
+		console.log('Encrypted text:', encryptedText);
+		let decoded;
+		try {
+			// Usa Buffer para decodificar desde base64 en Node.js
+			decoded = Buffer.from(encryptedText, 'base64').toString('binary');
+		} catch(e) {
+			console.error('Error decoding base64 with Buffer:', e);
+			return null;
+		}
+
+		let decrypted = '';
+		for(let i = 0; i < decoded.length; i++) {
+			let a = decoded.charCodeAt(i);
+			let b = key.charCodeAt(i % key.length);
+			decrypted += String.fromCharCode(a ^ b);
+		}
+		return decrypted;
+	}
+
+	static async recognitionChainlinkAnalysis(url1, url2) {
+
+		const secrets = { foo: 'bar' };
+		const source = fs.readFileSync('./functions/face.function.js').toString();
+
+		console.log('Source:', source);
+
+		try {
+			console.log('[Init...]');
+			const client = await auth.getClient();
+			const { data, tx } = await ChainLinkService.makeChainLinkRequest(
+				source,
+				[ url1, url2 ],
+				300_000,
+				secrets,
+			);
+
+			console.log('Data:', data);
+			console.log('TX:', tx);
+
+			return {
+				data: data,
+				tx: tx,
+			};
+		} catch(error) {
+			console.error('Error analyzing attachment:', error);
+			throw error;
+		}
+	}
+
+	static async ocrChainlinkAnalysis(url) {
+
+		const secrets = {};
+
+		let googleVisionBearer = '';
+		//get ./functions/ocr.function.js content as source
+		const source = fs.readFileSync('./functions/ocr.function.js').toString();
+
+		try {
+			console.log('[Init...]');
+			const client = await auth.getClient();
+			googleVisionBearer = await client.getAccessToken();
+			secrets.apiKey = googleVisionBearer.token;
+			const { data, tx } = await ChainLinkService.makeChainLinkRequest(
+				source,
+				[ url ],
+				300_000,
+				secrets,
+			);
+			const decryptedData = await AiService.decryptValue(data, secrets.apiKey);
+			return {
+				data: decryptedData,
+				tx: tx,
+			};
+		} catch(error) {
+			console.error('Error analyzing attachment:', error);
+			throw error;
+		}
+	}
 
 	static async analyzeAttachment(url) {
 
