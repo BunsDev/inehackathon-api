@@ -46,5 +46,10 @@ console.log(fun);
 */
 
 
-const res = await AiService.ocrChainlinkAnalysis('https://ag1.sfo3.digitaloceanspaces.com/upload/2024/06/62c6ab5f-b265-4c55-b2b6-d11011781c10-ine-rodrigo-tras.jpeg');
+//const res = await AiService.ocrChainlinkAnalysis('https://ag1.sfo3.digitaloceanspaces.com/upload/2024/06/62c6ab5f-b265-4c55-b2b6-d11011781c10-ine-rodrigo-tras.jpeg');
+
+const res = await AiService.recognitionChainlinkAnalysis(
+	'https://ag1.sfo3.digitaloceanspaces.com/upload/2024/06/1e8285ea-8460-4ee9-b3d4-7125c7917ece-ine-bjtm.png',
+	'https://ag1.sfo3.digitaloceanspaces.com/upload/2024/06/3479c558-dec3-4f56-bccb-d57b232904c6-selfie-bernie.jpg'
+);
 console.log("EL RESULTADO ES: ", res);
